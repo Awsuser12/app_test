@@ -16,11 +16,20 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image with the app
+                    sh "docker build -t python-app ."
+                }
+            }
+        }
+
         stage('Run Docker Container') {
             steps {
                 script {
                     // Run the Docker container with --network host to ensure proper networking
-                    sh "docker run -d --name ${CONTAINER_NAME} --network host ${DOCKER_IMAGE}"
+                    sh "docker run -d --name ${CONTAINER_NAME} --network host python-app"
                 }
             }
         }
