@@ -11,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image..."
-                sh 'docker build -t 329599658334.dkr.ecr.eu-north-1.amazonaws.com/healthsync-repository:latest .'
+                sh 'docker build -t 329599658334.dkr.ecr.eu-north-1.amazonaws.com/my-app:latest .'
             }
         }
 
