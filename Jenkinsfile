@@ -1,59 +1,57 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11-slim'  // Use Python 3.11 Docker image
-            args '-u root'  // Allow Jenkins to run as root user
-        }
-    }
+    agent any
 
     environment {
-        APP_DIR = "/app"  // Application directory
+        DOCKER_IMAGE = 'python:3.11-slim'
+        CONTAINER_NAME = 'python-app-container'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Pull Docker Image') {
             steps {
-                echo "Cloning the project from GitHub..."
-                git branch: 'main', url: 'https://github.com/Awsuser12/app_test.git'
+                script {
+                    // Pull the latest image
+                    sh "docker pull ${DOCKER_IMAGE}"
+                }
             }
         }
-
-        stage('Install Dependencies') {
+        
+        stage('Run Docker Container') {
             steps {
-                echo "Installing dependencies..."
-                sh 'apt-get update && apt-get install -y curl'  // Install curl
-                sh 'pip install --no-cache-dir -r requirements.txt'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo "Running Python inside Docker container"
-                sh 'python --version'
-            }
-        }
-
-        stage('Run Application') {
-            steps {
-                echo "Running the Python application..."
-                sh 'python app.py &'
+                script {
+                    // Run the Docker container with the required port mapping
+                    sh "docker run -d --name ${CONTAINER_NAME} -p 5000:5000 ${DOCKER_IMAGE}"
+                }
             }
         }
 
         stage('Verify Application') {
             steps {
-                echo "Verifying the application..."
-                sh 'curl http://localhost:5000'
+                script {
+                    // Verify that the application is running
+                    sh "curl -s http://localhost:5000 || exit 1"
+                }
+            }
+        }
+        
+        stage('Stop Docker Container') {
+            steps {
+                script {
+                    // Clean up by stopping the container
+                    sh "docker stop ${CONTAINER_NAME}"
+                    sh "docker rm ${CONTAINER_NAME}"
+                }
             }
         }
     }
 
     post {
-        success {
-            echo "Pipeline executed successfully!"
-        }
-        failure {
-            echo "Pipeline failed. Please check the logs."
+        always {
+            // Ensure Docker container is stopped and removed in case of failure
+            script {
+                sh "docker stop ${CONTAINER_NAME} || true"
+                sh "docker rm ${CONTAINER_NAME} || true"
+            }
         }
     }
 }
