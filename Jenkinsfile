@@ -21,6 +21,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo "Installing dependencies..."
+                sh 'apt-get update && apt-get install -y curl'  // Install curl
                 sh 'pip install --no-cache-dir -r requirements.txt'
             }
         }
