@@ -4,17 +4,17 @@ pipeline {
         AWS_REGION = 'eu-north-1' // AWS region
         ECR_REPO_URI = '329599658334.dkr.ecr.eu-north-1.amazonaws.com/my-app'
         IMAGE_TAG = 'latest'
-        AWS_ACCESS_KEY_ID = credentials('AKIAUZPNLVFPGWGVS7G3') // Jenkins credentials ID
-        AWS_SECRET_ACCESS_KEY = credentials('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') // Jenkins credentials ID
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Jenkins credentials ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Jenkins credentials ID
     }
     stages {
         stage('AWS ECR Login') {
             steps {
                 script {
                     sh '''
-                    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-                    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-                    aws configure set default.region ${AWS_REGION}
+                    export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                    export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                    export AWS_DEFAULT_REGION=${AWS_REGION}
 
                     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URI}
                     '''
