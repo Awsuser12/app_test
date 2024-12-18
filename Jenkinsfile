@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     // Run the Docker container with the required port mapping
-                    sh "docker run -d --name ${CONTAINER_NAME} -p 5000:5000 ${DOCKER_IMAGE}"
+                    sh "docker run -d --name ${CONTAINER_NAME} --network host ${DOCKER_IMAGE}"
                 }
             }
         }
