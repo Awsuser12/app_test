@@ -20,7 +20,7 @@ pipeline {
                 echo "Pushing Docker image to AWS ECR..."
                 sh '''
                 aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 329599658334.dkr.ecr.eu-north-1.amazonaws.com
-                docker push 329599658334.dkr.ecr.eu-north-1.amazonaws.com/healthsync-repository:latest
+                docker push 329599658334.dkr.ecr.eu-north-1.amazonaws.com/my-app:latest
                 '''
             }
         }
