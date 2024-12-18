@@ -1,49 +1,65 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11-slim'  // Use Python 3.11 Docker image
-            args '-u root'  // Allow Jenkins to run as root user
-        }
-    }
+    agent any
 
     environment {
-        APP_DIR = "/app"  // Application directory
+        AWS_DEFAULT_REGION = 'eu-north-1'  // Change to your AWS region
+        ECR_REPO = 'project/healthsync-repository'
+        EKS_CLUSTER_NAME = 'my-eks-cluster'
+        KUBERNETES_NAMESPACE = 'default'  // Namespace where the app will be deployed
+        DOCKER_IMAGE_TAG = 'latest'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "Cloning the project from GitHub..."
+                echo 'Cloning the repository...'
                 git branch: 'main', url: 'https://github.com/Awsuser12/app_test.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                echo "Installing dependencies..."
-                sh 'apt-get update && apt-get install -y curl'  // Install curl
-                sh 'pip install --no-cache-dir -r requirements.txt'
+                echo 'Building Docker image...'
+                script {
+                    docker.build("${ECR_REPO}:${DOCKER_IMAGE_TAG}")
+                }
             }
         }
 
-        stage('Build') {
+        stage('Push to ECR') {
             steps {
-                echo "Running Python inside Docker container"
-                sh 'python --version'
+                echo 'Pushing Docker image to AWS ECR...'
+                script {
+                    // Get ECR login command
+                    def ecrLogin = sh(script: 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com', returnStdout: true).trim()
+                    sh "docker tag ${ECR_REPO}:${DOCKER_IMAGE_TAG} <aws_account_id>.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${DOCKER_IMAGE_TAG}"
+                    sh "docker push <aws_account_id>.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${DOCKER_IMAGE_TAG}"
+                }
             }
         }
 
-        stage('Run Application') {
+        stage('Deploy to EKS') {
             steps {
-                echo "Running the Python application..."
-                sh 'python app.py &'
+                echo 'Deploying to EKS...'
+                script {
+                    // Update Kubernetes deployment to use the latest image
+                    sh """
+                    kubectl config use-context ${EKS_CLUSTER_NAME}
+                    kubectl set image deployment/my-python-app my-python-app=<aws_account_id>.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${DOCKER_IMAGE_TAG} --record
+                    kubectl apply -f k8s/service.yaml
+                    kubectl apply -f k8s/deployment.yaml
+                    """
+                }
             }
         }
 
-        stage('Verify Application') {
+        stage('Verify Deployment') {
             steps {
-                echo "Verifying the application..."
-                sh 'curl http://localhost:5000'
+                echo 'Verifying deployment...'
+                script {
+                    // Verify that the pod is running in EKS
+                    sh "kubectl get pods -n ${KUBERNETES_NAMESPACE}"
+                }
             }
         }
     }
