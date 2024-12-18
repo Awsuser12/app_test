@@ -15,11 +15,11 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the Docker container with the required port mapping
+                    // Run the Docker container with --network host to ensure proper networking
                     sh "docker run -d --name ${CONTAINER_NAME} --network host ${DOCKER_IMAGE}"
                 }
             }
@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Stop Docker Container') {
             steps {
                 script {
