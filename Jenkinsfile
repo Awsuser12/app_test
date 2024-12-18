@@ -11,13 +11,6 @@ pipeline {
     }
 
     stages {
-        stage('Pull Docker Image') {
-            steps {
-                echo "Pulling Docker image..."
-                sh 'docker pull python:3.11-slim'
-            }
-        }
-
         stage('Checkout') {
             steps {
                 echo "Cloning the project from GitHub..."
