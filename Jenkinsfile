@@ -29,6 +29,7 @@ pipeline {
             steps {
                 echo "Deploying to EKS..."
                 sh '''
+                aws eks --region eu-north-1 update-kubeconfig --name my-eks-cluster
                 kubectl apply -f deployment.yaml
                 '''
             }
