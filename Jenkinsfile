@@ -30,7 +30,8 @@ pipeline {
                 echo "Deploying to EKS..."
                 sh '''
                 aws eks --region eu-north-1 update-kubeconfig --name my-eks-cluster
-                kubectl apply -f deployment.yaml
+                cp /var/jenkins_home/deployment.yaml ${WORKSPACE}/deployment.yaml
+                kubectl apply -f ${WORKSPACE}/deployment.yaml
                 '''
             }
         }
