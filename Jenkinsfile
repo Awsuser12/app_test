@@ -30,7 +30,8 @@ pipeline {
                 echo "Deploying to EKS..."
                 sh '''
                 aws eks --region us-east-1 update-kubeconfig --name MyCluster
-                kubectl apply -f deployment.yaml
+                kubectl apply -f /home/ubuntu/deployment.yaml
+
                 '''
             }
         }
