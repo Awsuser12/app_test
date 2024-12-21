@@ -29,14 +29,14 @@ pipeline {
             steps {
                 echo "Deploying to EKS..."
                 sh '''
-                # Ensure the file is in a directory accessible by Jenkins
-                cp /home/ubuntu/deployment.yaml /tmp/deployment.yaml
-
+                # Change ownership of the deployment.yaml file to the Jenkins user
+                sudo chown jenkins:jenkins /home/ubuntu/deployment.yaml
+        
                 # Configure kubectl to connect to your EKS cluster
                 aws eks --region us-east-1 update-kubeconfig --name MyCluster
         
                 # Apply the deployment
-                kubectl apply -f /tmp/deployment.yaml
+                kubectl apply -f /home/ubuntu/deployment.yaml
                 '''
             }
         }
