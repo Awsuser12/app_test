@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = 'AKIAUZPNLVFPGWGVS7G3'
-        AWS_SECRET_ACCESS_KEY = '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'
-        AWS_DEFAULT_REGION = 'eu-north-1'
+        AWS_ACCESS_KEY_ID = 'AKIAVFIWI7H2KV4XOTUE'
+        AWS_SECRET_ACCESS_KEY = '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'
+        AWS_DEFAULT_REGION = 'us-east-1'
     }
 
     stages {
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 echo "Deploying to EKS..."
                 sh '''
-                aws eks --region eu-north-1 update-kubeconfig --name my-eks-cluster
+                aws eks --region eu-north-1 update-kubeconfig --name MyCluster
                 cp /var/jenkins_home/deployment.yaml ${WORKSPACE}/deployment.yaml
                 kubectl apply -f ${WORKSPACE}/deployment.yaml
                 '''
