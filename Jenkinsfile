@@ -30,7 +30,7 @@ pipeline {
                 echo "Deploying to EKS..."
                 sh '''
                 aws eks --region us-east-1 update-kubeconfig --name MyCluster
-                kubectl apply -f /cicd/deployment.yaml
+                kubectl apply -f deployment.yaml
                 '''
             }
         }
